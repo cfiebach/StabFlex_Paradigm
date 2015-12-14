@@ -1,0 +1,204 @@
+#####################################################################################################################
+#####################################################################################################################
+
+# PCL-File fuer Flex-Experiment
+
+#####################################################################################################################
+#####################################################################################################################
+
+### Variablen-Definitionen
+int ntrial = 150;											# Anzahl der Trials
+int arraysize = 6 * ntrial; 							# Groesse der Arrays expdef
+
+preset string textfile_ENTER_femaleNo_and_hand_block2;			   # Name des Inputfiles expdef
+
+double basecount = 0.0;
+double distrcount = 0.0;
+double switchcount = 0.0;
+
+double base = 120.0;	
+double distr = 10.0;
+double switch = 10.0;
+
+int ende_pulse = 171;   # hierauf startet der Abspann Ende Trial
+
+logfile.add_event_entry(textfile_ENTER_femaleNo_and_hand_block2);
+
+### Definition der Input-Files
+input_file expdef = new input_file;      		# .txt-file mit Eintraegen fuer alle Arrays
+
+#####################################################################################################################
+### Arrays
+#####################################################################################################################
+
+### Definition der Arrays zur "Experiment-Definition"
+
+array <string> condition[arraysize]; 				
+array <string> stimulus_oben[arraysize]; 			
+array <string> stimulus_unten[arraysize];
+array <int> brightness_oben[arraysize];				
+array <int> brightness_unten[arraysize];			
+array <int> target_button[arraysize];			
+
+### Auffuellen der Arrays zur "Experiment-Definition" mit den Informationen aus dem .txt-file
+
+expdef.open(textfile_ENTER_femaleNo_and_hand_block2);
+int count = 0;
+loop until
+   expdef.end_of_file() || count == arraysize || !expdef.last_succeeded()
+begin
+   count = count + 1;
+   
+   condition[count] = expdef.get_string();
+   stimulus_oben[count] = expdef.get_string();
+   stimulus_unten[count] = expdef.get_string();
+   brightness_oben[count] = expdef.get_int();
+   brightness_unten[count] = expdef.get_int();
+   target_button[count] = expdef.get_int();
+   
+end;
+
+### Warnung bei Einlesefehlern
+if !expdef.last_succeeded() then
+   term.print( "Error while reading! \nLetzter Werte aus Input-Datei konnte nicht ausgelesen werden. \n" )
+elseif !expdef.end_of_file() then
+   term.print( "Exceeded capacity!\n" )
+end; 
+
+### Ausgabe der Array-Inhalte ins Terminal
+loop
+   int k = 1
+until
+   k > count
+begin
+   term.print( condition[k] );
+   term.print( "\n" );
+   term.print( stimulus_oben[k] );
+   term.print( "\n" );
+   term.print( stimulus_unten[k] );
+   term.print( "\n" );
+   term.print( brightness_oben[k] );
+   term.print( "\n" );
+   term.print( brightness_unten[k] );
+   term.print( "\n" );
+   term.print( target_button[k] );
+   term.print( "\n" );
+
+	k = k + 1
+end;
+
+#### JETZT Trials - redefinieren & present
+
+instruction_reminder_trial.present();     # bei Pbn alles okay?
+
+stimulus_data last_start = stimulus_manager.last_stimulus_data();
+	
+	if (last_start.type() == stimulus_hit) then
+		warning_trial.present();
+		
+	elseif (last_start.type() == stimulus_incorrect) then
+		warning_text1.set_caption("Wir sprechen Sie an.");
+	   warning_text1.redraw();
+		warning_text2.set_caption("Proband will Messung NICHT STARTEN! \nSofort ansprechen.");
+	   warning_text2.redraw();
+		warning_trial.present();
+   end;
+
+trial_dummyscans.present(); # leerer Bildschirm
+fix_trial.present();        # Fiationskreuz fuer 2 TR (3700ms)
+
+## Setzen aller variablen Parameter in jedem Trial
+### START Trial (einziger Trial, der mit Puls getriggert wird!)
+
+inputitem_oben_start.set_caption(stimulus_oben[1]);
+inputitem_oben_start.set_font_color(brightness_oben[1], brightness_oben[1], brightness_oben[1]);
+inputitem_oben_start.redraw();
+
+inputitem_unten_start.set_caption(stimulus_unten[1]);
+inputitem_unten_start.set_font_color(brightness_unten[1], brightness_unten[1], brightness_unten[1]);
+inputitem_unten_start.redraw();
+
+## code fuer picture
+task_event_start.set_event_code("cond:" + condition[1] + "_stimuli_presented:" + stimulus_oben[1] + stimulus_unten[1] + "_brightness:" + printf(brightness_oben[1],"%u"));
+task_event_start.set_target_button(target_button[1]);
+
+## target Button fuer ITI
+iti_event_start.set_target_button(target_button[1]);
+
+start_main_trial.present();
+
+# UM number corrects zu bekommen
+if (condition[1] == "1" && (response_manager.last_response())== target_button[1])
+	then basecount = basecount + 1.0
+
+elseif (condition[1] == "2" && (response_manager.last_response())== target_button[1])
+	then distrcount = distrcount + 1.0
+
+elseif (condition[1] == "3" && (response_manager.last_response())== target_button[1])
+	then switchcount = switchcount + 1.0
+
+end;  
+
+### alle restlichen Trials > nicht Puls-getriggert
+
+loop 
+int itrial = 2;
+until itrial > ntrial 
+begin
+
+#set_target_button(target_button[itrial-1]);
+
+## picture
+inputitem_oben.set_caption(stimulus_oben[itrial]);
+inputitem_oben.set_font_color(brightness_oben[itrial], brightness_oben[itrial], brightness_oben[itrial]);
+inputitem_oben.redraw();
+
+inputitem_unten.set_caption(stimulus_unten[itrial]);
+inputitem_unten.set_font_color(brightness_unten[itrial], brightness_unten[itrial], brightness_unten[itrial]);
+inputitem_unten.redraw();
+
+## code fuer picture
+task_event.set_event_code("cond:" + condition[itrial] + "_stimuli_presented:" + stimulus_oben[itrial] + stimulus_unten[itrial] + "_brightness:" + printf(brightness_oben[itrial],"%u"));
+task_event.set_target_button(target_button[itrial]);
+
+## target Button fuer ITI
+iti_event.set_target_button(target_button[itrial]);
+
+main_trial.present();
+
+# UM number corrects zu bekommen
+if (condition[itrial] == "1" && (response_manager.last_response())== target_button[itrial])
+	then basecount = basecount + 1.0
+
+end;     
+
+if (condition[itrial] == "2" && (response_manager.last_response())== target_button[itrial])
+	then distrcount = distrcount + 1.0
+
+end;    
+
+if (condition[itrial] == "3" && (response_manager.last_response())== target_button[itrial])
+	then switchcount = switchcount + 1.0
+
+end;    
+
+itrial = itrial + 1;
+
+end;
+
+### ABSPANN##################
+double percent_correct_base;
+percent_correct_base = (basecount / base) * 100.0;
+double percent_correct_distr;
+percent_correct_distr = (distrcount / distr) * 100.0;
+double percent_correct_switch;
+percent_correct_switch = (switchcount / switch) * 100.0;
+
+logfile.add_event_entry("Prozent korrekt " + "Baseline: " + printf(percent_correct_base,"%.1f") + "%");
+logfile.add_event_entry("Prozent korrekt " + "Distraktor: " + printf(percent_correct_distr,"%.1f") + "%");
+logfile.add_event_entry("Prozent korrekt " + "Switch: " + printf(percent_correct_switch,"%.1f") + "%");
+
+ende_trial.set_mri_pulse(ende_pulse);
+ende_trial.present();
+
+ende_info_trial.present();

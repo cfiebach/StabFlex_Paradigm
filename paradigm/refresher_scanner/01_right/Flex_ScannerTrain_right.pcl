@@ -1,0 +1,138 @@
+#####################################################################################################################
+#####################################################################################################################
+
+# PCL-File fuer Flex-Experiment
+
+#####################################################################################################################
+#####################################################################################################################
+
+### Variablen-Definitionen
+int ntrial = 60;											# Anzahl der Trials
+int arraysize = 6 * ntrial; 							# Groesse der Arrays expdef
+string textfile = "Flex_ScannerTrain_right";			   # Name des Inputfiles expdef
+
+## letzer Pulse = das was man am Scanner einstellt
+#int end_pulse = 32;
+
+
+### Definition der Input-Files (Das sind 3 verschiedene .txt-files)
+input_file expdef = new input_file;      		# .txt-file mit Eintraegen fuer alle Arrays, die nur 1 Item einlesen muessen
+
+#####################################################################################################################
+### Arrays
+#####################################################################################################################
+
+### Definition der Arrays zur "Experiment-Definition"
+#array <int> pulses[arraysize];
+array <string> condition[arraysize]; 				
+array <string> stimulus_oben[arraysize]; 			
+array <string> stimulus_unten[arraysize];
+array <int> brightness_oben[arraysize];				
+array <int> brightness_unten[arraysize];			
+array <int> target_button[arraysize];			
+
+### Auffuellen der Arrays zur "Experiment-Definition" mit den Informationen aus dem .txt-file
+
+expdef.open(textfile);
+int count = 0;
+loop until
+   expdef.end_of_file() || count == arraysize || !expdef.last_succeeded()
+begin
+   count = count + 1;
+   
+#   pulses[count] = expdef.get_int();
+   condition[count] = expdef.get_string();
+   stimulus_oben[count] = expdef.get_string();
+   stimulus_unten[count] = expdef.get_string();
+   brightness_oben[count] = expdef.get_int();
+   brightness_unten[count] = expdef.get_int();
+   target_button[count] = expdef.get_int();
+   
+end;
+
+### Warnung bei Einlesefehlern
+if !expdef.last_succeeded() then
+   term.print( "Error while reading! \nLetzter Wert aus Input-Datei konnte nicht ausgelesen werden. \n" )
+elseif !expdef.end_of_file() then
+   term.print( "Exceeded capacity!\n" )
+end; 
+
+### Ausgabe der Array-Inhalte ins Terminal
+loop
+   int k = 1
+until
+   k > count
+begin
+#   term.print( pulses[k] );
+#   term.print( "\n" );
+   term.print( condition[k] );
+   term.print( "\n" );
+   term.print( stimulus_oben[k] );
+   term.print( "\n" );
+   term.print( stimulus_unten[k] );
+   term.print( "\n" );
+   term.print( brightness_oben[k] );
+   term.print( "\n" );
+   term.print( brightness_unten[k] );
+   term.print( "\n" );
+   term.print( target_button[k] );
+   term.print( "\n" );
+
+	k = k + 1
+end;
+
+#### JETZT Trials - redefinieren & present
+
+ProbeScreen_trial.present();              # pcl-Dateien geaendert?
+instruction_reminder_trial.present();     # bei Pbn alles okay?
+
+stimulus_data last_start = stimulus_manager.last_stimulus_data();
+	
+	if (last_start.type() == stimulus_hit) then
+		warning_trial.present();
+		
+	elseif (last_start.type() == stimulus_incorrect) then
+		warning_text1.set_caption("Wir sprechen Sie an.");
+	   warning_text1.redraw();
+		warning_text2.set_caption("Proband will Messung NICHT STARTEN! \nSofort ansprechen.");
+	   warning_text2.redraw();
+		warning_trial.present();
+   end;
+
+fix_trial.present();
+
+## Setzen aller variablen Parameter in jedem Trial
+
+loop 
+int itrial = 1;
+until itrial > ntrial 
+begin
+
+## MRI Pulse aus Textfile
+#main_trial.set_mri_pulse(pulses[itrial]);
+
+#set_target_button(target_button[itrial-1]);
+
+## picture
+inputitem_oben.set_caption(stimulus_oben[itrial]);
+inputitem_oben.set_font_color(brightness_oben[itrial], brightness_oben[itrial], brightness_oben[itrial]);
+inputitem_oben.redraw();
+
+inputitem_unten.set_caption(stimulus_unten[itrial]);
+inputitem_unten.set_font_color(brightness_unten[itrial], brightness_unten[itrial], brightness_unten[itrial]);
+inputitem_unten.redraw();
+
+## code fuer picture
+task_event.set_event_code("cond:" + condition[itrial] + "_stimuli_presented:" + stimulus_oben[itrial] + stimulus_unten[itrial] + "_brightness:" + printf(brightness_unten[itrial],"%u"));
+task_event.set_target_button(target_button[itrial]);
+
+## target Button fuer ITI
+iti_event.set_target_button(target_button[itrial]);
+
+main_trial.present();
+
+itrial = itrial + 1;
+
+end;
+
+ende_trial.present();

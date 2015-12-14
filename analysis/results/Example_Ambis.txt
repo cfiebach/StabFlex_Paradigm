@@ -1,0 +1,5 @@
+sbj RT_ambiSwitches RT_ambiNonSwitches ambiSwitches_total ambiSwitches_correct 
+1.0 1121.15 991.677777778 11.0 4.0 
+3.0 1306.8 1519.2 19.0 16.0 
+2.0 1163.36666667 1551.41 11.0 10.0 
+4.0 1587.3 1102.42142857 17.0 14.0 

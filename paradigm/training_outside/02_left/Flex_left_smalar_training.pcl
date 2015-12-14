@@ -1,0 +1,123 @@
+#####################################################################################################################
+#####################################################################################################################
+
+# PCL-File fuer Flex-Experiment
+
+#####################################################################################################################
+#####################################################################################################################
+
+### Variablen-Definitionen
+int ntrial = 20;											# Anzahl der Trials >> ANPASSEN auf 50!
+int arraysize = 5 * ntrial; 							# Groesse der Arrays expdef
+string textfile = "train1_smalar_left";	   # Name des Inputfiles expdef >> ANPASSEN
+
+double totalcount = 0.0;
+double mtrial = 20.0;									# >> ANPASSEN auf 50! (fuer Prozent korrekt auszurechnen)
+
+
+### Definition der Input-Files (Das sind 3 verschiedene .txt-files)
+input_file expdef = new input_file;      		# .txt-file mit Eintraegen fuer alle Arrays, die nur 1 Item einlesen muessen
+
+#####################################################################################################################
+### Arrays
+#####################################################################################################################
+
+### Definition der Arrays zur "Experiment-Definition"
+
+array <string> condition[arraysize]; 				
+array <string> stimulus_oben[arraysize]; 			
+array <string> stimulus_unten[arraysize];				
+array <int> brightness_unten[arraysize];			
+array <int> target_button[arraysize];			
+
+### Auffuellen der Arrays zur "Experiment-Definition" mit den Informationen aus dem .txt-file
+
+expdef.open(textfile);
+int count = 0;
+loop until
+   expdef.end_of_file() || count == arraysize || !expdef.last_succeeded()
+begin
+   count = count + 1;
+   
+   condition[count] = expdef.get_string();
+   stimulus_oben[count] = expdef.get_string();
+   stimulus_unten[count] = expdef.get_string();
+   brightness_unten[count] = expdef.get_int();
+   target_button[count] = expdef.get_int();
+   
+end;
+
+### Warnung bei Einlesefehlern
+if !expdef.last_succeeded() then
+   term.print( "Error while reading! \nLetzter Werte aus Input-Datei konnte nicht ausgelesen werden. \n" )
+elseif !expdef.end_of_file() then
+   term.print( "Exceeded capacity!\n" )
+end; 
+
+### Ausgabe der Array-Inhalte ins Terminal
+loop
+   int k = 1
+until
+   k > count
+begin
+   term.print( condition[k] );
+   term.print( "\n" );
+   term.print( stimulus_oben[k] );
+   term.print( "\n" );
+   term.print( stimulus_unten[k] );
+   term.print( "\n" );
+   term.print( brightness_unten[k] );
+   term.print( "\n" );
+   term.print( target_button[k] );
+   term.print( "\n" );
+
+	k = k + 1
+end;
+
+#### JETZT Trials - redefinieren & present
+instruction1_trial.present();
+#instruction2_trial.present();
+fix_trial.present();
+
+## Setzen aller variablen Parameter in jedem Trial
+
+loop 
+int itrial = 1;
+until itrial > ntrial 
+begin
+
+
+## picture
+inputitem_oben.set_caption(stimulus_oben[itrial]);
+inputitem_oben.redraw();
+
+inputitem_unten.set_caption(stimulus_unten[itrial]);
+inputitem_unten.set_font_color(brightness_unten[itrial], brightness_unten[itrial], brightness_unten[itrial]);
+inputitem_unten.redraw();
+
+## code für picture
+task_event.set_event_code("cond:" + condition[itrial] + "stimuli_presented:" + stimulus_oben[itrial] + stimulus_unten[itrial]);
+task_event.set_target_button(target_button[itrial]);
+
+## target Button fuer ITI
+itiandfix_event.set_target_button(target_button[itrial]);
+
+main_trial.present();
+
+# UM number corrects zu bekommen
+if (response_manager.last_response())== target_button[itrial]
+	then totalcount = totalcount + 1.0
+	else totalcount = totalcount
+end;     
+
+itrial = itrial + 1;
+
+end;
+
+double percent_correct;
+percent_correct = (totalcount / mtrial) * 100.0;
+
+ende_text.set_caption("Prozent korrekt: " + printf(percent_correct,"%.1f") + "%");  ## um aus double percent_correct einen string zu machen (damit ichs in den text schreiben kann); "%.1f" = Format, in dem mir Zahl ausgegeben werden soll, mit dem nach dem Punkt = Anzahl der Nachkommastellen
+ende_text.redraw();
+
+ende_trial.present();
