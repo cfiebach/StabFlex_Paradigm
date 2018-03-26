@@ -1,5 +1,9 @@
-**The StabFlex-Paradigm** (Armbruster, Ueltzhöffer, Basten, & Fiebach
-2012)
+# StabFlex: An experimental paper for measuring cognitive stability vs. flexibility
+
+This repo documents the StabFlex paradigm, employed in multiple neurocognitive experiments.
+
+## The StabFlex-Paradigm
+### (Armbruster, Ueltzhöffer, Basten, & Fiebach 2012)
 
 ... is programmed with „Presentation“ software, version ....
 
@@ -12,7 +16,7 @@ decision) is performed by the right hand, and the „switch“ task
 study, i.e., involving training outside the scanner, refresher and main
 task inside the scanner.
 
-**Required material:**
+## Required material:
 
 -   Presentation files
 
@@ -25,7 +29,7 @@ task inside the scanner.
 CAVE: First adjust the directories to the logfiles and presentation
 files in the .exp files!
 
-**Buttons (using a German or English keyboard)**
+### Buttons (using a German or English keyboard)
 
 -   **Odd / even decision:**\
     right rando: right index finger on „n“ (=odd),\
@@ -39,7 +43,7 @@ files in the .exp files!
     left Rando: right index finger on „n“ (=smaller 5)\
     right middle finger on „m“ (=larger 5)
 
-**TRAINING**
+## TRAINING
 
 -   Go into the *“training\_outside”* directory and decide whether you
     want to train your subject with the “right” or “left” version (see
@@ -157,14 +161,14 @@ assignment of keys in the scanner (60 trials including all conditions)
 ---------- **2. BLOCK** \[5 min; healthy controls: 150 trials, patients:
 100 trials\] -------------
 
-The End
+## The End
 
 These materials were developed by Diana Armbruster-Genc, Kai
 Ueltzhöffer, Ulrike Basten, and Christian Fiebach, 2011-2015; Fiebach
 Lab for Cognitive Neuroscience, Dept. of Psychology, Goethe University
 Frankfurt.
 
-When using these materilas, please cite:
+When using these materials, please cite:
 
 Armbruster, D. J. N., Ueltzhöffer, K., Basten, U., & Fiebach, C. J.
 (2012). Prefrontal cortical mechanisms underlying individual differences
